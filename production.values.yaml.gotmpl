@@ -1,0 +1,65 @@
+image:
+  # Repository of the image to be deployed.
+  repository: registry.gitlab.asd.com/architecture/api-v2-hub/api-v2
+
+  # Tag for image to be deployed.
+  tag: {{ requiredEnv "IMAGE_TAG" }}
+
+# The image pull secrets to use to pull the image.
+imagePullSecrets:
+  # If true, the chart will create the image pull secret using the value in
+  # dockerconfigjson.
+  create: true
+
+  # The name of the secret. If create is false, the deployment will use a
+  # pre-created secret with the given name. Otherwise, a secret will be
+  # created with the given name. If this is blank, no image pull secret is used
+  # for the deployment.
+  name: asd-gitlab-registry-api-v2
+
+  # The image pull secret, valid only if create is true.
+  dockerconfigjson:
+
+configMap: 
+  GO_ENV: prod
+
+podAnnotations:
+  co.elastic.logs/enabled: "true"
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/metric-path: "/metrics"
+
+replicas: 2
+
+# Configure auto-scaling policies.
+autoscaling:
+  # Set to true to enable auto-scaling.
+  enabled: true
+
+  # Minimum number of replicas to maintain.
+  minReplicas: 2
+
+  # Maximum number of replicas to scale to.
+  maxReplicas: 10
+
+  # Target CPU utilization rate to maintain.
+  targetCPUUtilizationPercentage: 75
+
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+    external-dns.alpha.kubernetes.io/hostname: api-v2-alc.asd.com, api-v2.asd.com
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+  hosts:
+  - api-v2-alc.asd.com
+  - api-v2.asd.com
+
+  tls:
+  - hosts:
+    - api-v2-alc.asd.com
+    - api-v2.asd.com
+    secretName: api-v2-emr-production-tls
+
+# Pod disruption budget.
+podDisruptionBudget:
+  maxUnavailable: 1

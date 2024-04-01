@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+{{ include "asdcommon.labels" $ | indent 4 }}
+  name: {{ $.Release.Name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ $.Values.replicas }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+{{ include "asdcommon.labels" $ | indent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        {{- with $.Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+{{ include "asdcommon.labels" $ | indent 8 }}
+    spec:
+      affinity: {}
+      containers:
+      - envFrom:
+        - secretRef:
+            name: {{ $.Release.Name }}
+            optional: false
+        - configMapRef:
+            name: {{ $.Release.Name }}
+            optional: false
+        image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+        imagePullPolicy: Always
+        name: api-v2
+        {{- with $.Values.server.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        stdin: true
+        tty: true
+      {{- with $.Values.imagePullSecrets.name }}
+      imagePullSecrets:
+      - name: {{ . }}
+      {{- end }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

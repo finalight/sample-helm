@@ -1,0 +1,8 @@
+apiVersion: v2
+name: api-v2
+type: application
+version: 0.0.0
+dependencies:
+- name: asd-common
+  version: 0.0.0
+  repository: file://../../charts/common

@@ -1,0 +1,6 @@
+dependencies:
+- name: asd-common
+  repository: file://../../charts/common
+  version: 0.0.0
+digest: sha256:c8c4170f0b58d6f7c90f9fe0c8a1f53b9ae7e741fbd3693b2e8bf729924a144b
+generated: "2023-08-31T01:29:19.230816+08:00"

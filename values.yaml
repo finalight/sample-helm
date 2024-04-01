@@ -1,0 +1,68 @@
+image:
+  # Repository of the image to be deployed.
+  repository: registry.gitlab.asd.com/architecture/api-v2-hub/api-v2
+
+  # Tag for image to be deployed.
+  tag:
+
+# The image pull secrets to use to pull the image.
+imagePullSecrets:
+  # If true, the chart will create the image pull secret using the value in
+  # dockerconfigjson.
+  create: true
+
+  # The name of the secret. If create is false, the deployment will use a
+  # pre-created secret with the given name. Otherwise, a secret will be
+  # created with the given name. If this is blank, no image pull secret is used
+  # for the deployment.
+  name: asd-gitlab-registry-api-v2
+
+  # The image pull secret, valid only if create is true.
+  dockerconfigjson:
+
+configMap: {}
+
+secret: {}
+
+autoscaling:
+  enabled: false
+
+# Values specific to the server.
+server:
+  # Number of replicas to run.
+  replicas: 1
+
+  template:
+    spec:
+      containers:
+      - args: [ ]
+        command: [ ]
+        envFrom:
+        - configMapRef:
+            name: api-v2-env
+        volumeMounts:
+        - mountPath: /app/conf/dev/conf.yaml
+          name: conf
+          readOnly: true
+          subPath: conf.yaml
+        - mountPath: /app/conf/staging/conf.yaml
+          name: conf
+          readOnly: true
+          subPath: conf.yaml
+        - mountPath: /app/conf/prod/conf.yaml
+          name: conf
+          readOnly: true
+          subPath: conf.yaml          
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          name: api-v2-conf
+        name: conf
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 256Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+
